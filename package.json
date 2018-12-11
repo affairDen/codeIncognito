@@ -1,0 +1,23 @@
+{
+  "name": "telegrambot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "inedx.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "nodemailer": "^4.7.0",
+    "ramda": "^0.26.1",
+    "telebot": "^1.2.6"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.7"
+  }
+}
