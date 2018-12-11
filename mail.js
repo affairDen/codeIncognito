@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { emailSubject } = require('./texts');
 
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -11,8 +12,8 @@ const transporter = nodemailer.createTransport({
 function sendEmail(data) {
     const mailOptions = {
       from: 'Codeincognito',
-      to: 'codeincognito@ukr.net',
-      subject: 'Телеграм бот Codeincognito',
+      to: process.env.CALLBACK_EMAIL,
+      subject: emailSubject,
       html: `
         <table style="text-align:left;">
             <tr>
