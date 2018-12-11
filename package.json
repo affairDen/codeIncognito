@@ -5,7 +5,10 @@
   "main": "inedx.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "start:dev": "nodemon index.js",
+    "start": "forever start index.js",
+    "stop": "forever stop index.js",
+    "clean:logs": "forever cleanlogs"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +16,7 @@
   "dependencies": {
     "dotenv": "^6.2.0",
     "express": "^4.16.4",
+    "forever": "^0.15.3",
     "nodemailer": "^4.7.0",
     "ramda": "^0.26.1",
     "telebot": "^1.2.6"
