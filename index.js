@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const http = require('http')
+// const http = require('http')
 const TeleBot = require('telebot');
 const express = require('express');
 const { evolve, assoc } = require('ramda');
@@ -94,14 +94,14 @@ bot.on('ask.city', msg => {
 
 bot.start();
 
-const server = http.createServer((req, res) => res.end('Hello Node.js Server!'));
+// const server = http.createServer((req, res) => res.end('Hello Node.js Server!'));
 
-server.listen(process.env.PORT, (err) => {
-  if (err) {
-    return console.log('something bad happened', err)
-  }
+// server.listen(process.env.PORT, (err) => {
+//   if (err) {
+//     return console.log('something bad happened', err)
+//   }
 
-  console.log(`server is listening on ${process.env.PORT}`)
-})
+//   console.log(`server is listening on ${process.env.PORT}`)
+// })
 
 
