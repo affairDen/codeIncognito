@@ -5,10 +5,7 @@ const TeleBot = require('telebot');
 const express = require('express');
 const { evolve, assoc } = require('ramda');
 
-const { 
-	startMsg, btnText, successMsg, codeMsg, nameMsg, 
-	nameMsgError, phoneMsg, phoneMsgError, cityMsg, cityMsgError 
-} = require('./texts');
+const { getTr } = require('./texts');
 const { sendEmail } = require('./mail');
 
 
@@ -25,83 +22,75 @@ const saveUserData = (id, key, value) => {
 	})(usersData);
 };
 
+const msgHandler = (msg, type, nextType, isInvalid) => {
+	const { text, from: { id: userId } } = msg;
+	const trKey = isInvalid ? `${type}_error` : nextType;
+	const ask = isInvalid ? type : nextType;
+
+	type && saveUserData(userId, type, text);
+
+	bot.sendMessage(userId, getTr(trKey), {ask})
+		.catch(console.log);	
+};
+
 bot.on(['/start'], (msg) => {
-	bot.sendMessage(msg.from.id, startMsg, {
+	bot.sendMessage(msg.from.id, getTr('welcome'), {
 		parseMode: 'html',
 		markup: bot.inlineKeyboard([
-	        [bot.inlineButton(btnText, {callback: 'accept'})]
+	        [bot.inlineButton(getTr('btn'), {callback: 'accept'})]
 	    ])
 	});
 });
-
 
 bot.on('callbackQuery', msg => {
 	const { data, from: { id: userId } } = msg;
 
 	if (msg.data !== 'accept') return;
 
-	usersData[userId] = {};
+	usersData[userId] = { id: userId };
 
-	bot.sendMessage(userId, codeMsg, {ask: 'code'});
-
+	msgHandler(msg, '', 'code');
 });
 
-bot.on('ask.code', msg => {
-	const { text: code, from: { id: userId } } = msg;
-
-	saveUserData(userId, 'code', code);
-
-    bot.sendMessage(userId, nameMsg, {ask: 'name'});
-});
+bot.on('ask.code', msg => msgHandler(msg, 'code', 'name'));
 
 bot.on('ask.name', msg => {
-	const { text: name, from: { id: userId } } = msg;
+	const { text } = msg;
 	const regExp = /\S+\s+\S+\s+\S+/;
-
-	saveUserData(userId, 'name', name);
-
-	name.length < 8 || !regExp.test(name) 
-		? bot.sendMessage(userId, nameMsgError, {ask: 'name'})
-		: bot.sendMessage(userId, phoneMsg, {ask: 'phone'});
+	const isInvalid = text.length < 8 || !regExp.test(text);
+	
+	msgHandler(msg, 'name', 'birthday', isInvalid);
+	console.log(usersData);
 });
+
+bot.on('ask.birthday', msg => msgHandler(msg, 'birthday', 'birthdayPlace'));
+
+bot.on('ask.birthdayPlace', msg => msgHandler(msg, 'birthdayPlace', 'registration'));
+
+bot.on('ask.registration', msg => msgHandler(msg, 'registration', 'livingPlace'));
+
+bot.on('ask.livingPlace', msg => msgHandler(msg, 'livingPlace', 'passport'));
+
+bot.on('ask.passport', msg => msgHandler(msg, 'passport', 'phone'));
 
 bot.on('ask.phone', msg => {
-	let { text: phone, from: { id: userId } } = msg;
 	const regExp = /\s{0,2}/;
+	const phone = (msg.text.match(/\d+/g, '') || []).join('');
+	const isValid = phone.length === 10 || phone.length === 12;
 
-	phone = phone.match(/\d+/g, '').join('');
-
-	saveUserData(userId, 'phone', phone);
-
-	phone.length === 10 || phone.length === 12
-		? bot.sendMessage(userId, cityMsg, {ask: 'city'})
-		: bot.sendMessage(userId, phoneMsgError, {ask: 'phone'});
-
+	msgHandler(msg, 'phone', 'email', !isValid);
 });
 
-bot.on('ask.city', msg => {
-	let { text: city, from: { id: userId } } = msg;
+bot.on('ask.email', msg => {
+	const { text, from: { id: userId } } = msg;
 
-	saveUserData(userId, 'city', city);
+	saveUserData(userId, 'email', text);
 
-	if (city.length < 2) {
-		bot.sendMessage(userId, cityMsgError, {ask: 'city'});
-	} else {
-		sendEmail(usersData[userId])
-			.then(_ => bot.sendMessage(userId, successMsg));
-	}
+	sendEmail(usersData[userId])
+		.then(_ => bot.sendMessage(userId, getTr(`success`)))
+		.catch(console.log);
+		
 });
 
 bot.start();
-
-// const server = http.createServer((req, res) => res.end('Hello Node.js Server!'));
-
-// server.listen(process.env.PORT, (err) => {
-//   if (err) {
-//     return console.log('something bad happened', err)
-//   }
-
-//   console.log(`server is listening on ${process.env.PORT}`)
-// })
-
 
