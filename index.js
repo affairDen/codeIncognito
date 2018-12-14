@@ -3,7 +3,7 @@ require('dotenv').config();
 // const http = require('http')
 const TeleBot = require('telebot');
 const express = require('express');
-const { evolve, assoc } = require('ramda');
+const { evolve, assoc, omit } = require('ramda');
 
 const { getTr } = require('./texts');
 const { sendEmail } = require('./mail');
@@ -87,7 +87,11 @@ bot.on('ask.email', msg => {
 	saveUserData(userId, 'email', text);
 
 	sendEmail(usersData[userId])
-		.then(_ => bot.sendMessage(userId, getTr(`success`)))
+		.then(_ => {
+			bot.sendMessage(userId, getTr(`success`));
+
+			usersData = omit([userId], usersData);
+		})
 		.catch(console.log);
 		
 });

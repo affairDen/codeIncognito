@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const path = require('path');
-const { emailSubject } = require('./texts');
+const { getTr } = require('./texts');
 // const writeFile = require('./writeFile');
 
 const transporter = nodemailer.createTransport({
@@ -13,9 +13,9 @@ const transporter = nodemailer.createTransport({
 
 function sendEmail(data) {
     const mailOptions = {
-        from: 'Codeincognito',
+        from: process.env.EMAIL_USER,
         to: process.env.CALLBACK_EMAIL,
-        subject: emailSubject,
+        subject: getTr('emailSubject'),
         html: `
             <table style="text-align:left;">
                 <tr>
